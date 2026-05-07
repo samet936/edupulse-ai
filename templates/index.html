@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduPulse AI Coach V4</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.5);
+            --glass-bg: rgba(20, 25, 40, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        /* 1. ARKA PLAN: Hareketli Gradient + Soft Noise */
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            color: var(--text-main); 
+            min-height: 100vh;
+            padding: 40px 0;
+            display: flex;
+            flex-direction: column;
+            /* Dark gradient */
+            background: linear-gradient(-45deg, #09090b, #1e1b4b, #0f172a, #172554);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            position: relative;
+        }
+        
+        /* Noise (Kumlanma) Efekti */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; }
+
+        /* 2. GLASSMORPHISM KARTLAR */
+        .master-card { 
+            background: var(--glass-bg); 
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px; 
+            padding: 35px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3); 
+            border: 1px solid var(--glass-border);
+            transition: transform 0.4s ease, border-color 0.4s ease;
+            animation: fadeInUp 0.8s ease-out;
+        }
+        .master-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* 8. MICRO ANIMATIONS */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 6. SECTION AYIRICI TASARIM */
+        .section-header { 
+            display: flex;
+            align-items: center;
+            margin: 35px 0 20px; 
+            font-weight: 800; 
+            font-size: 0.85rem; 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px;
+            color: #60a5fa; 
+        }
+        .section-header::before {
+            content: "";
+            width: 8px; height: 8px;
+            background: #3b82f6;
+            border-radius: 50%;
+            margin-right: 12px;
+            box-shadow: 0 0 10px #3b82f6;
+        }
+        .section-header::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to right, rgba(96, 165, 250, 0.3), transparent);
+            margin-left: 15px;
+        }
+
+        /* 4. TYPOGRAPHY & INPUTS */
+        .form-label { font-weight: 600; font-size: 0.8rem; color: var(--text-muted); letter-spacing: 0.5px; }
+        .form-control, .form-select { 
+            border-radius: 12px; 
+            padding: 12px 16px; 
+            border: 1px solid var(--glass-border); 
+            background: rgba(15, 23, 42, 0.5);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            background: rgba(15, 23, 42, 0.8);
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+            color: white;
+            outline: none;
+        }
+        .form-select option { background: #0f172a; color: white; }
+
+        /* Sliders */
+        .form-range::-webkit-slider-thumb { 
+            background: var(--accent); 
+            box-shadow: 0 0 12px var(--accent); 
+        }
+        .badge-val { 
+            font-weight: 800; color: white; padding: 4px 12px; 
+            border-radius: 8px; font-size: 0.75rem; 
+            background: rgba(59, 130, 246, 0.2); 
+            border: 1px solid rgba(59, 130, 246, 0.5);
+        }
+
+        /* 3. BUTON TASARIMI */
+        .btn-analyze { 
+            background: linear-gradient(45deg, #2563eb, #8b5cf6); 
+            color: white; 
+            border-radius: 14px; 
+            padding: 18px; 
+            font-weight: 800; 
+            letter-spacing: 1px;
+            border: none; 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            margin-top: 35px;
+            box-shadow: 0 10px 25px -5px var(--accent-glow);
+        }
+        .btn-analyze:hover { 
+            transform: translateY(-3px) scale(1.02); 
+            box-shadow: 0 15px 35px -5px var(--accent-glow); 
+            filter: brightness(1.1);
+        }
+
+        /* 5. SONUÇ PANELİ */
+        .result-panel { display: none; margin-top: 40px; animation: fadeInUp 0.6s ease-out; }
+        
+        .score-display {
+            background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 30px rgba(96, 165, 250, 0.2);
+            font-size: 4.5rem;
+        }
+
+        .inner-result-card {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            height: 100%;
+        }
+
+        #rStatus {
+            background: rgba(59, 130, 246, 0.1) !important;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #93c5fd;
+        }
+
+        /* 9. FOOTER (UYARI) */
+        .ai-disclaimer {
+            text-align: center;
+            font-size: 11px;
+            color: #94a3b8;
+            opacity: 0.6;
+            margin-top: auto; /* İterek en alta yapıştırır */
+            padding-top: 40px;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" style="max-width: 950px;">
+    <div class="text-center mb-5" style="animation: fadeInUp 0.8s ease-out;">
+        <h1 class="fw-bold display-5 mb-2">EduPulse AI <span style="color: #60a5fa;">Coach V4</span></h1>
+        <p class="text-muted" style="letter-spacing: 0.5px;">Yaş ve Biyolojik Veri Destekli Analiz Sistemi</p>
+    </div>
+
+    <div id="errorBox" class="alert alert-danger d-none mb-4 shadow-sm" style="border-radius: 15px; background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.3); color: #fca5a5; backdrop-filter: blur(10px);"></div>
+
+    <form id="analysisForm" class="master-card">
+        <div class="section-header">Akademik & Biyolojik Temel</div>
+        <div class="row g-3">
+            <div class="col-md-3"><label class="form-label">Yaşınız</label><input type="number" name="age" class="form-control" value="20" required></div>
+            <div class="col-md-3"><label class="form-label">Vize 1 (G1)</label><input type="number" name="G1" class="form-control" placeholder="0-100" required></div>
+            <div class="col-md-3"><label class="form-label">Vize 2 (G2)</label><input type="number" name="G2" class="form-control" placeholder="0-100" required></div>
+            <div class="col-md-3"><label class="form-label">Haftalık Deneme</label><input type="number" name="deneme" class="form-control" value="2" required></div>
+        </div>
+
+        <div class="section-header">Strateji Odak Alanları</div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">En Güçlü Ders</label>
+                <select name="guclu_ders" class="form-select" required>
+                    <option value="" disabled selected>Ders Seçin</option>
+                    <option value="Matematik">Matematik</option><option value="Yazılım">Yazılım</option><option value="Fen Bilimleri">Fen Bilimleri</option><option value="Türkçe">Türkçe</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">En Zayıf Ders</label>
+                <select name="zayif_ders" class="form-select" required>
+                    <option value="" disabled selected>Ders Seçin</option>
+                    <option value="Matematik">Matematik</option><option value="Yazılım">Yazılım</option><option value="Fen Bilimleri">Fen Bilimleri</option><option value="Türkçe">Türkçe</option>
+                </select>
+            </div>
+            <div class="col-md-8"><label class="form-label">Zayıf Konu</label><input type="text" name="zayif_konu" class="form-control" placeholder="Örn: SQL Joinler, Türev..." required></div>
+            <div class="col-md-4"><label class="form-label">Sınava Kalan Gün</label><input type="number" name="exam_days_left" class="form-control" value="30" required></div>
+        </div>
+
+        <div class="section-header">Psiko-Bilişsel Durum</div>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="d-flex justify-content-between"><label class="form-label">Motivasyon</label><span id="v_mot" class="badge-val">5</span></div>
+                <input type="range" name="motivation" class="form-range" min="1" max="10" oninput="document.getElementById('v_mot').innerText=this.value">
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex justify-content-between"><label class="form-label">Kaygı Düzeyi</label><span id="v_anx" class="badge-val">5</span></div>
+                <input type="range" name="anxiety" class="form-range" min="1" max="10" oninput="document.getElementById('v_anx').innerText=this.value">
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex justify-content-between"><label class="form-label">Zihinsel Yorgunluk</label><span id="v_fat" class="badge-val">5</span></div>
+                <input type="range" name="mental_fatigue" class="form-range" min="1" max="10" oninput="document.getElementById('v_fat').innerText=this.value">
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex justify-content-between"><label class="form-label">Günlük Enerji</label><span id="v_enr" class="badge-val">5</span></div>
+                <input type="range" name="daily_energy_trend" class="form-range" min="1" max="10" oninput="document.getElementById('v_enr').innerText=this.value">
+            </div>
+        </div>
+
+        <div class="section-header">Yaşam Dengesi</div>
+        <div class="row g-3">
+            <div class="col-md-4"><label class="form-label">Çalışma (Saat)</label><input type="number" name="studytime" class="form-control" step="0.5" value="6" required></div>
+            <div class="col-md-4"><label class="form-label">Uyku (Saat)</label><input type="number" name="sleep_hours" class="form-control" step="0.5" value="7.5" required></div>
+            <div class="col-md-4"><label class="form-label">Sosyal Medya (Saat)</label><input type="number" name="social_media" class="form-control" step="0.5" value="2" required></div>
+        </div>
+
+        <button type="submit" class="btn-analyze w-100 shadow">STRATEJİK ANALİZİ BAŞLAT</button>
+    </form>
+
+    <div id="results" class="result-panel">
+        <div class="master-card border-0" style="background: rgba(15, 23, 42, 0.6);">
+            <div class="row align-items-center text-center">
+                <div class="col-md-4 border-end border-secondary border-opacity-25">
+                    <h1 id="rScore" class="score-display fw-bold mb-0"></h1>
+                    <p class="text-muted small fw-bold mt-2 tracking-widest">PERFORMANS SKORU</p>
+                </div>
+                <div class="col-md-8 px-4 text-start">
+                    <h4 id="rMode" class="fw-bold mb-1 text-white"></h4>
+                    <p id="rPhase" class="text-muted small mb-3"></p>
+                    <div id="rStatus" class="alert py-2 px-3 small mb-0 rounded-3"></div>
+                </div>
+            </div>
+            <hr class="my-4 border-secondary border-opacity-25">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="inner-result-card">
+                        <h6 class="fw-bold" style="color: #f87171;">⚠️ ANALİZ EDİLEN PROBLEM</h6>
+                        <p id="rProblem" class="small text-light opacity-75 mb-0"></p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="inner-result-card">
+                        <h6 class="fw-bold" style="color: #4ade80;">🎯 STRATEJİK YOL HARİTASI</h6>
+                        <p id="rStrategy" class="small text-light opacity-75 mb-0"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 p-4 rounded-4" style="background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border);">
+                <h6 class="fw-bold mb-3 text-info">📋 ÖNCELİKLİ AKSİYON PLANI</h6>
+                <ul id="rPlan" class="small text-light opacity-75 mb-0" style="line-height: 1.8;"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🧩 EKLENEN YAPAY ZEKA UYARISI (FOOTER) -->
+    <div class="ai-disclaimer">
+        📌 Bu sistem yapay zeka destekli bir analiz aracıdır. Sonuçlar tahmini olup kesinlik içermez.
+    </div>
+</div>
+
+<script>
+    document.getElementById('analysisForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const res = await fetch('/analyze', { method: 'POST', body: new FormData(e.target) });
+        const d = await res.json();
+        if(d.success) {
+            document.getElementById('errorBox').classList.add('d-none');
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('rScore').innerText = `%${d.score}`;
+            document.getElementById('rMode').innerText = d.mode;
+            document.getElementById('rPhase').innerText = d.phase;
+            document.getElementById('rStatus').innerText = d.status;
+            document.getElementById('rProblem').innerText = d.problem;
+            document.getElementById('rStrategy').innerText = d.strategy;
+            document.getElementById('rPlan').innerHTML = d.plan.map(p => `<li class="mb-2">${p}</li>`).join('');
+            window.scrollTo({ top: document.getElementById('results').offsetTop - 30, behavior: 'smooth' });
+        } else {
+            document.getElementById('errorBox').innerText = d.error_msg;
+            document.getElementById('errorBox').classList.remove('d-none');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+</script>
+</body>
+</html>
