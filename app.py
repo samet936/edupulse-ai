@@ -96,9 +96,75 @@ class EduPulseMasterEngine:
             strategy = f"Önce {d['guclu_ders']} ile ısın, sonra en zorlandığın {d['zayif_konu']} çalış."
         else:
             status = "Acil Müdahale: Sistem çökme riski taşıyor."
-            problem = "Düşük uyku ve yüksek kaygı bilişsel kapasiteyi kilitliyor."
-            strategy = "Uykuyu 7 saate sabitle and sadece son 5 yılın sorularına odaklan."
+            problem = "Düşük uyku und yüksek kaygı bilişsel kapasiteyi kilitliyor."
+            strategy = "Uykuyu 7 saate sabitle ve sadece son 5 yılın sorularına odaklan."
 
         return {
             "mode": mode, "phase_desc": phase, "status_msg": status,
-            "problem_msg": problem
+            "problem_msg": problem, "strategy_msg": strategy,
+            "plan": [
+                f"{d['zayif_konu']} konusunu 3 farklı kaynaktan bitir.",
+                f"{d['guclu_ders']} branşında haftalık 2 deneme yap.",
+                "Saat 22:00'den sonra dijital detoks uygula."
+            ]
+        }
+
+@app.route('/')
+def index():
+    FIREBASE_URL = "https://edupulse-db-80989-default-rtdb.firebaseio.com/analizler.json"
+    gecmis_analizler = []
+    
+    try:
+        response = requests.get(FIREBASE_URL, timeout=5)
+        if response.status_code == 200:
+            veriler = response.json()
+            if veriler and isinstance(veriler, dict):
+                for key, deger in veriler.items():
+                    if isinstance(deger, dict):
+                        gecmis_analizler.append(deger)
+                gecmis_analizler.reverse()
+    except Exception as e:
+        print("Firebase veri çekme hatası:", e)
+        
+    return render_template('index.html', analizler=gecmis_analizler)
+
+@app.route('/analyze', methods=['POST'])
+def analyze():
+    engine = EduPulseMasterEngine(request.form)
+    is_valid, err = engine.validate_biological_limits()
+    if not is_valid:
+        return jsonify({'success': False, 'error_msg': err})
+
+    score = engine.calculate_performance_score()
+    strat = engine.build_strategy_logic()
+    
+    FIREBASE_URL = "https://edupulse-db-80989-default-rtdb.firebaseio.com/analizler.json"
+    
+    firebase_veri = {
+        "yas": request.form.get("age"),
+        "g1_notu": request.form.get("G1"),
+        "g2_notu": request.form.get("G2"),
+        "calisma_suresi": request.form.get("studytime"),
+        "uyku_suresi": request.form.get("sleep_hours"),
+        "sosyal_medya": request.form.get("social_media"),
+        "guclu_ders": request.form.get("guclu_ders"),
+        "zayif_ders": request.form.get("zayif_ders"),
+        "zayif_konu": request.form.get("zayif_konu"),
+        "hesaplanan_skor": score,
+        "strateji_modu": strat['mode']
+    }
+    
+    try:
+        requests.post(FIREBASE_URL, json=firebase_veri, timeout=5)
+    except Exception as e:
+        print("Firebase kayıt hatası:", e)
+
+    return jsonify({
+        'success': True, 'score': score, 'mode': strat['mode'],
+        'status': strat['status_msg'], 'problem': strat['problem_msg'],
+        'strategy': strat['strategy_msg'], 'plan': strat['plan'],
+        'phase': strat['phase_desc']
+    })
+
+if __name__ == '__main__':
+    app.run(debug=True)
