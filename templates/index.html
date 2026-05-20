@@ -179,8 +179,8 @@
             font-size: 11px;
             color: #94a3b8;
             opacity: 0.6;
-            margin-top: auto; /* İterek en alta yapıştırır */
-            padding-top: 40px;
+            margin-top: 30px;
+            padding-top: 10px;
             font-weight: 400;
             letter-spacing: 0.3px;
         }
@@ -199,9 +199,9 @@
     <form id="analysisForm" class="master-card">
         <div class="section-header">Akademik & Biyolojik Temel</div>
         <div class="row g-3">
-            <div class="col-md-3"><label class="form-label">Yaşınız</label><input type="number" name="age" class="form-control" value="20" required></div>
-            <div class="col-md-3"><label class="form-label">Vize 1 (G1)</label><input type="number" name="G1" class="form-control" placeholder="0-100" required></div>
-            <div class="col-md-3"><label class="form-label">Vize 2 (G2)</label><input type="number" name="G2" class="form-control" placeholder="0-100" required></div>
+            <div class="col-md-3"><label class="form-label">Yaşınız</label><input type="number" id="in_age" name="age" class="form-control" value="20" required></div>
+            <div class="col-md-3"><label class="form-label">Vize 1 (G1)</label><input type="number" id="in_g1" name="G1" class="form-control" placeholder="0-100" required></div>
+            <div class="col-md-3"><label class="form-label">Vize 2 (G2)</label><input type="number" id="in_g2" name="G2" class="form-control" placeholder="0-100" required></div>
             <div class="col-md-3"><label class="form-label">Haftalık Deneme</label><input type="number" name="deneme" class="form-control" value="2" required></div>
         </div>
 
@@ -209,14 +209,14 @@
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">En Güçlü Ders</label>
-                <select name="guclu_ders" class="form-select" required>
+                <select id="in_guclu" name="guclu_ders" class="form-select" required>
                     <option value="" disabled selected>Ders Seçin</option>
                     <option value="Matematik">Matematik</option><option value="Yazılım">Yazılım</option><option value="Fen Bilimleri">Fen Bilimleri</option><option value="Türkçe">Türkçe</option>
                 </select>
             </div>
             <div class="col-md-6">
                 <label class="form-label">En Zayıf Ders</label>
-                <select name="zayif_ders" class="form-select" required>
+                <select id="in_zayif" name="zayif_ders" class="form-select" required>
                     <option value="" disabled selected>Ders Seçin</option>
                     <option value="Matematik">Matematik</option><option value="Yazılım">Yazılım</option><option value="Fen Bilimleri">Fen Bilimleri</option><option value="Türkçe">Türkçe</option>
                 </select>
@@ -247,8 +247,8 @@
 
         <div class="section-header">Yaşam Dengesi</div>
         <div class="row g-3">
-            <div class="col-md-4"><label class="form-label">Çalışma (Saat)</label><input type="number" name="studytime" class="form-control" step="0.5" value="6" required></div>
-            <div class="col-md-4"><label class="form-label">Uyku (Saat)</label><input type="number" name="sleep_hours" class="form-control" step="0.5" value="7.5" required></div>
+            <div class="col-md-4"><label class="form-label">Çalışma (Saat)</label><input type="number" id="in_study" name="studytime" class="form-control" step="0.5" value="6" required></div>
+            <div class="col-md-4"><label class="form-label">Uyku (Saat)</label><input type="number" id="in_sleep" name="sleep_hours" class="form-control" step="0.5" value="7.5" required></div>
             <div class="col-md-4"><label class="form-label">Sosyal Medya (Saat)</label><input type="number" name="social_media" class="form-control" step="0.5" value="2" required></div>
         </div>
 
@@ -290,7 +290,49 @@
         </div>
     </div>
 
-    <!-- 🧩 EKLENEN YAPAY ZEKA UYARISI (FOOTER) -->
+    <div class="container mt-5 px-0" style="background: rgba(255,255,255,0.03); padding: 25px; border-radius: 20px; border: 1px solid var(--glass-border);">
+        <h3 class="text-center mb-4" style="color: #fff; font-weight: 800; font-size: 1.4rem;">📊 Geçmiş Öğrenci Analizleri</h3>
+        
+        <div class="table-responsive">
+            <table class="table table-dark table-striped table-hover align-middle mb-0" style="border-radius: 12px; overflow: hidden;">
+                <thead>
+                    <tr style="background: rgba(15, 23, 42, 0.8);">
+                        <th>Yaş</th>
+                        <th>G1 Notu</th>
+                        <th>G2 Notu</th>
+                        <th>Çalışma</th>
+                        <th>Uyku</th>
+                        <th>Güçlü Ders</th>
+                        <th>Zayıf Ders</th>
+                        <th>Hesaplanan Skor</th>
+                        <th>Strateji</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTableBody">
+                    {% if analizler %}
+                        {% for analiz in analizler %}
+                        <tr>
+                            <td>{{ analiz.yas or '-' }}</td>
+                            <td>{{ analiz.g1_notu or '-' }}</td>
+                            <td>{{ analiz.g2_notu or '-' }}</td>
+                            <td>{{ analiz.calisma_suresi or '-' }} sa</td>
+                            <td>{{ analiz.uyku_suresi or '-' }} sa</td>
+                            <td>{{ analiz.guclu_ders or '-' }}</td>
+                            <td>{{ analiz.zayif_ders or '-' }}</td>
+                            <td><span class="badge bg-success">{{ analiz.hesaplanan_skor or '-' }}</span></td>
+                            <td>{{ analiz.strateji_modu or '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr id="noDataRow">
+                            <td colspan="9" class="text-center text-muted py-4">Henüz kaydedilmiş bir analiz bulunmuyor.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <div class="ai-disclaimer">
         📌 Bu sistem yapay zeka destekli bir analiz aracıdır. Sonuçlar tahmini olup kesinlik içermez.
     </div>
@@ -311,6 +353,27 @@
             document.getElementById('rProblem').innerText = d.problem;
             document.getElementById('rStrategy').innerText = d.strategy;
             document.getElementById('rPlan').innerHTML = d.plan.map(p => `<li class="mb-2">${p}</li>`).join('');
+            
+            // Canlı tabloya yeni satır ekleme özelliği (Sayfa yenilemeden ekler)
+            const noData = document.getElementById('noDataRow');
+            if(noData) noData.remove();
+            
+            const tbody = document.getElementById('historyTableBody');
+            const newRow = `
+                <tr>
+                    <td>${document.getElementById('in_age').value}</td>
+                    <td>${document.getElementById('in_g1').value}</td>
+                    <td>${document.getElementById('in_g2').value}</td>
+                    <td>${document.getElementById('in_study').value} sa</td>
+                    <td>${document.getElementById('in_sleep').value} sa</td>
+                    <td>${document.getElementById('in_guclu').value}</td>
+                    <td>${document.getElementById('in_zayif').value}</td>
+                    <td><span class="badge bg-success">${d.score}</span></td>
+                    <td>${d.mode}</td>
+                </tr>
+            `;
+            tbody.insertAdjacentHTML('afterbegin', newRow);
+
             window.scrollTo({ top: document.getElementById('results').offsetTop - 30, behavior: 'smooth' });
         } else {
             document.getElementById('errorBox').innerText = d.error_msg;
@@ -321,45 +384,3 @@
 </script>
 </body>
 </html>
-<div class="container mt-5" style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px;">
-    <h3 class="text-center mb-4" style="color: #fff;">📊 Geçmiş Öğrenci Analizleri</h3>
-    
-    <div class="table-responsive">
-        <table class="table table-dark table-striped table-hover">
-            <thead>
-                <tr>
-                    <th>Yaş</th>
-                    <th>G1 Notu</th>
-                    <th>G2 Notu</th>
-                    <th>Çalışma (Saati)</th>
-                    <th>Uyku (Saati)</th>
-                    <th>Güçlü Ders</th>
-                    <th>Zayıf Ders</th>
-                    <th>Hesaplanan Skor</th>
-                    <th>Strateji</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if analizler %}
-                    {% for analiz in analizler %}
-                    <tr>
-                        <td>{{ analiz.yas or '-' }}</td>
-                        <td>{{ analiz.g1_notu or '-' }}</td>
-                        <td>{{ analiz.g2_notu or '-' }}</td>
-                        <td>{{ analiz.calisma_suresi or '-' }} sa</td>
-                        <td>{{ analiz.uyku_suresi or '-' }} sa</td>
-                        <td>{{ analiz.guclu_ders or '-' }}</td>
-                        <td>{{ analiz.zayif_ders or '-' }}</td>
-                        <td><span class="badge bg-success">{{ analiz.hesaplanan_skor or '-' }}</span></td>
-                        <td>{{ analiz.strateji_modu or '-' }}</td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="9" class="text-center text-muted">Henüz kaydedilmiş bir analiz bulunmuyor.</td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
-</div>
