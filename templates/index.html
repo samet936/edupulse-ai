@@ -321,3 +321,45 @@
 </script>
 </body>
 </html>
+<div class="container mt-5" style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px;">
+    <h3 class="text-center mb-4" style="color: #fff;">📊 Geçmiş Öğrenci Analizleri</h3>
+    
+    <div class="table-responsive">
+        <table class="table table-dark table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Yaş</th>
+                    <th>G1 Notu</th>
+                    <th>G2 Notu</th>
+                    <th>Çalışma (Saati)</th>
+                    <th>Uyku (Saati)</th>
+                    <th>Güçlü Ders</th>
+                    <th>Zayıf Ders</th>
+                    <th>Hesaplanan Skor</th>
+                    <th>Strateji</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if analizler %}
+                    {% for analiz in analizler %}
+                    <tr>
+                        <td>{{ analiz.yas or '-' }}</td>
+                        <td>{{ analiz.g1_notu or '-' }}</td>
+                        <td>{{ analiz.g2_notu or '-' }}</td>
+                        <td>{{ analiz.calisma_suresi or '-' }} sa</td>
+                        <td>{{ analiz.uyku_suresi or '-' }} sa</td>
+                        <td>{{ analiz.guclu_ders or '-' }}</td>
+                        <td>{{ analiz.zayif_ders or '-' }}</td>
+                        <td><span class="badge bg-success">{{ analiz.hesaplanan_skor or '-' }}</span></td>
+                        <td>{{ analiz.strateji_modu or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center text-muted">Henüz kaydedilmiş bir analiz bulunmuyor.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
