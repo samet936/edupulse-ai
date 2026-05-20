@@ -1,3 +1,4 @@
+import requests
 import math
 import numpy as np
 from flask import Flask, render_template, request, jsonify
@@ -58,11 +59,10 @@ class EduPulseMasterEngine:
 
         # --- YAŞ ÇARPANI (Biyolojik Verimlilik Katmanı) ---
         age = float(d.get('age', 20))
-        # Kaggle verilerine göre 18-24 yaş arası en yüksek bilişsel verim %8 bonus sağlar.
         if 18 <= age <= 24: age_mult = 1.08
         elif 25 <= age <= 35: age_mult = 1.03
         elif age < 18: age_mult = 1.00
-        else: age_mult = 0.94 # 35+ yaş için koruma odaklı denge
+        else: age_mult = 0.94
 
         # Final Normalization (Sigmoid)
         raw_total = academic_base + efficiency + (lifestyle_base * 0.15 * 10) + mental_normalized
@@ -123,6 +123,31 @@ def analyze():
     score = engine.calculate_performance_score()
     strat = engine.build_strategy_logic()
     
+    # ==========================================================
+    # KANKA FIREBASE KAYIT MOTORU TAM BURAYA EKLENDİ 🚀
+    # ==========================================================
+    FIREBASE_URL = "https://edupulse-db-80989-default-rtdb.firebaseio.com/analizler.json"
+    
+    firebase_veri = {
+        "yas": request.form.get("age"),
+        "g1_notu": request.form.get("G1"),
+        "g2_notu": request.form.get("G2"),
+        "calisma_suresi": request.form.get("studytime"),
+        "uyku_suresi": request.form.get("sleep_hours"),
+        "sosyal_medya": request.form.get("social_media"),
+        "guclu_ders": request.form.get("guclu_ders"),
+        "zayif_ders": request.form.get("zayif_ders"),
+        "zayif_konu": request.form.get("zayif_konu"),
+        "hesaplanan_skor": score,
+        "strateji_modu": strat['mode']
+    }
+    
+    try:
+        requests.post(FIREBASE_URL, json=firebase_veri)
+    except Exception as e:
+        print("Firebase kayıt hatası kanka:", e)
+    # ==========================================================
+
     return jsonify({
         'success': True, 'score': score, 'mode': strat['mode'],
         'status': strat['status_msg'], 'problem': strat['problem_msg'],
